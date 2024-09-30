@@ -73,9 +73,9 @@ date-saved:: {{{dateSaved}}}
 date-published:: {{{datePublished}}}
 {{/datePublished}}`
 
-export const defaultHighlightTemplate = `> {{{text}}} [⤴️]({{{highlightUrl}}}) {{#labels}} #[[{{{name}}}]] {{/labels}}
+export const defaultHighlightTemplate = `{{#note.length}}note:: {{{note}}}{{/note.length}}
 
-{{#note.length}}note:: {{{note}}}{{/note.length}}`
+> {{{text}}} [⤴️]({{{highlightUrl}}}) {{#labels}} #[[{{{name}}}]] {{/labels}}`
 
 const getItemState = (item: Item): string => {
   if (item.isArchived) {
