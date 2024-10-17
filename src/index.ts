@@ -162,6 +162,7 @@ const fetchOmnivore = async (inBackground = false) => {
     isSinglePage,
     headingBlockTitle,
     syncContent,
+    fixedHighlightId,
   } = logseq.settings as Settings
   // prevent multiple fetches
   if (loading) {
@@ -242,12 +243,38 @@ const fetchOmnivore = async (inBackground = false) => {
       const itemBatchBlocksMap: Map<string, IBatchBlock[]> = new Map()
       for (const item of items) {
         if (!isSinglePage) {
-          // create a new page for each article
           pageName = replaceIllegalChars(
             renderPageName(item, pageNameTemplate, preferredDateFormat)
           )
+          
+          if (fixedHighlightId) {
+            // 如果固定 highlight ID，则删除现有页面并重新创建
+            const existingPage = await logseq.Editor.getPage(pageName)
+            if (existingPage) {
+              await logseq.Editor.deletePage(pageName)
+              console.log(`Deleted existing page: ${pageName}`)
+            }
+            
+            const newPage = await logseq.Editor.createPage(pageName, {}, {
+              createFirstBlock: false,
+              redirect: false
+            })
+            
+            if (!newPage) {
+              console.error(`Failed to create new page: ${pageName}`)
+              continue
+            }
+            
+            targetBlockId = newPage.uuid
+          } else {
+            // 如果不固定 highlight ID，使用原有的逻辑
+            targetBlockId = await getOmnivoreBlockIdentity(pageName, blockTitle)
+          }
+        } else {
           targetBlockId = await getOmnivoreBlockIdentity(pageName, blockTitle)
         }
+        
+        // 其余的代码保持不变
         const itemBatchBlocks = itemBatchBlocksMap.get(targetBlockId) || []
         // render article
         const renderedItem = renderItem(
@@ -255,9 +282,11 @@ const fetchOmnivore = async (inBackground = false) => {
           item,
           preferredDateFormat
         )
-
+        
         // escape # to prevent creating subpages
         const articleContent = item.content?.replaceAll('#', '\\#') || ''
+        console.log("articleContent")
+        console.log(articleContent)
         // create original content title block
         const contentBlock: IBatchBlock = {
           content: contentTitle,
@@ -294,7 +323,6 @@ const fetchOmnivore = async (inBackground = false) => {
         }
         const highlightBatchBlocks: IBatchBlock[] =
           highlights?.map((it) => {
-            // Render highlight content string based on highlight template
             const content = renderHighlightContent(
               highlightTemplate,
               it,
@@ -303,9 +331,7 @@ const fetchOmnivore = async (inBackground = false) => {
             )
             return {
               content,
-              properties: {
-                id: it.id,
-              },
+              properties: fixedHighlightId ? { id: it.id } : {}
             }
           }) || []
 
@@ -358,6 +384,7 @@ const fetchOmnivore = async (inBackground = false) => {
                 {
                   sibling: false,
                   before: true,
+                  keepUUID: true  // 添加这一行
                 }
               )
             }
@@ -372,40 +399,33 @@ const fetchOmnivore = async (inBackground = false) => {
             )
             if (existingHighlightBlock) {
               parentBlockId = existingHighlightBlock.uuid
-              // append new highlights to existing article block
+              // process highlights
               for (const highlight of highlightBatchBlocks) {
-                // check if highlight block exists
-                const existingHighlightsBlock = await getBlockByContent(
-                  pageName,
-                  parentBlockId,
-                  highlight.properties?.id as string
-                )
-                if (existingHighlightsBlock) {
-                  // update existing highlight if content is different
-                  if (existingHighlightsBlock.content !== highlight.content) {
-                    await logseq.Editor.updateBlock(
-                      existingHighlightsBlock.uuid,
-                      highlight.content
+                const highlightId = highlight.properties?.id as string
+                if (highlightId) {
+                  // 查找具有相同 id 的现有高亮块
+                  const existingHighlightBlock = await logseq.Editor.getBlockProperty(parentBlockId, highlightId)
+                  if (existingHighlightBlock) {
+                    // 如果存在，更新内容
+                    await logseq.Editor.updateBlock(existingHighlightBlock.uuid, highlight.content)
+                  } else {
+                    // 如果不存在，创建新的高亮块
+                    await logseq.Editor.insertBlock(
+                      parentBlockId,
+                      highlight.content,
+                      { properties: { id: highlight.properties?.id } }  // 更新 id 属性
                     )
                   }
-                } else {
-                  // append new highlights to existing article block
-                  await logseq.Editor.insertBatchBlock(
-                    parentBlockId,
-                    highlight,
-                    {
-                      sibling: false,
-                    }
-                  )
                 }
               }
             } else {
-              // append new highlights block
+              // 如果高亮标题块不存在，创建新的高亮标题块及其子块
               await logseq.Editor.insertBatchBlock(
                 existingItemBlock.uuid,
                 highlightsBlock,
                 {
                   sibling: false,
+                  keepUUID: true
                 }
               )
             }
@@ -423,11 +443,11 @@ const fetchOmnivore = async (inBackground = false) => {
           itemBatchBlocks.unshift({
             content: renderedItem,
             children,
-            properties: {
-              id: item.id,
-            },
+            properties: {},
           })
           itemBatchBlocksMap.set(targetBlockId, itemBatchBlocks)
+          console.log("itemBatchBlocksMap")
+          console.log(itemBatchBlocksMap)
         }
       }
 
@@ -435,6 +455,7 @@ const fetchOmnivore = async (inBackground = false) => {
         await logseq.Editor.insertBatchBlock(targetBlockId, articleBatch, {
           before: true,
           sibling: false,
+          keepUUID: true
         })
       }
 

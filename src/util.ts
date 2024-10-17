@@ -24,7 +24,7 @@ export const getHighlightLocation = (patch: string | null): number => {
   }
   const dmp = new diff_match_patch()
   const patches = dmp.patch_fromText(patch)
-  return patches[0].start1 || 0
+  return (patches[0] as any).start1 || 0
 }
 
 export const getHighlightPoint = (patch: string | null): HighlightPoint => {
