@@ -43,6 +43,7 @@ export type HighlightView =
       text: string
       labels?: Label[]
       highlightUrl: string
+      highlightId: string
       dateHighlighted: string
       rawDateHighlighted: string
       note?: string
@@ -184,6 +185,7 @@ export const renderHighlightContent = (
     text: formatHighlightQuote(highlight.quote, template),
     labels: highlight.labels || [],
     highlightUrl: `https://omnivore.app/me/${item.slug}#${highlight.id}`,
+    highlightId: highlight.id,
     dateHighlighted,
     rawDateHighlighted,
     note: highlight.annotation ?? undefined,

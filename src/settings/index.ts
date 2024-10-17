@@ -32,6 +32,7 @@ export interface Settings {
   version: string
   headingBlockTitle: string
   syncContent: boolean
+  fixedHighlightId: boolean
 }
 
 export const getQueryFromFilter = (
@@ -204,5 +205,12 @@ export const settingsSchema = async (): Promise<SettingSchemaDesc[]> => [
       "Enter the Omnivore server's API endpoint here (default: https://api-prod.omnivore.app/api/graphql )"
     ),
     default: 'https://api-prod.omnivore.app/api/graphql',
+  },
+  {
+    key: 'fixedHighlightId',
+    type: 'boolean',
+    default: false,
+    title: t('Fixed Highlight ID'),
+    description: t('If checked, highlight blocks will have fixed IDs. This will cause the entire page to be recreated when updating articles.'),
   },
 ]

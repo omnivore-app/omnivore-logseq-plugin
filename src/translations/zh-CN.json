@@ -46,5 +46,7 @@
     "Failed to create Omnivore page. Please check the pageName in the settings": "创建 Omnivore 页面失败。请检查设置中的页面名称",
     "### Content": "### 内容",
     "Sync article content": "同步文章内容",
-    "Sync article content into the content block. If this is not selected, only highlights will be synced.": "将文章内容同步到内容块。如果未选择此选项，将仅同步高亮。"
+    "Sync article content into the content block. If this is not selected, only highlights will be synced.": "将文章内容同步到内容块。如果未选择此选项，将仅同步高亮。",
+    "Fixed Highlight ID": "固定高亮ID",
+    "If checked, highlight blocks will have fixed IDs. This will cause the entire page to be recreated when updating articles.": "如果选中，高亮块将具有固定ID。这将导致更新文章时重新创建整个页面。"
 }
