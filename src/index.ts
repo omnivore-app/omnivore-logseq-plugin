@@ -248,7 +248,7 @@ const fetchOmnivore = async (inBackground = false) => {
           )
           
           if (fixedHighlightId) {
-            // 如果固定 highlight ID，则删除现有页面并重新创建
+            // If fixed highlight ID is enabled, delete existing page and recreate
             const existingPage = await logseq.Editor.getPage(pageName)
             if (existingPage) {
               await logseq.Editor.deletePage(pageName)
@@ -267,14 +267,13 @@ const fetchOmnivore = async (inBackground = false) => {
             
             targetBlockId = newPage.uuid
           } else {
-            // 如果不固定 highlight ID，使用原有的逻辑
+            // If fixed highlight ID is not enabled, use the original logic
             targetBlockId = await getOmnivoreBlockIdentity(pageName, blockTitle)
           }
         } else {
           targetBlockId = await getOmnivoreBlockIdentity(pageName, blockTitle)
         }
         
-        // 其余的代码保持不变
         const itemBatchBlocks = itemBatchBlocksMap.get(targetBlockId) || []
         // render article
         const renderedItem = renderItem(
@@ -384,7 +383,7 @@ const fetchOmnivore = async (inBackground = false) => {
                 {
                   sibling: false,
                   before: true,
-                  keepUUID: true  // 添加这一行
+                  keepUUID: true
                 }
               )
             }
@@ -403,23 +402,23 @@ const fetchOmnivore = async (inBackground = false) => {
               for (const highlight of highlightBatchBlocks) {
                 const highlightId = highlight.properties?.id as string
                 if (highlightId) {
-                  // 查找具有相同 id 的现有高亮块
+                  // Find existing highlight block with the same id
                   const existingHighlightBlock = await logseq.Editor.getBlockProperty(parentBlockId, highlightId)
                   if (existingHighlightBlock) {
-                    // 如果存在，更新内容
+                    // If exists, update content
                     await logseq.Editor.updateBlock(existingHighlightBlock.uuid, highlight.content)
                   } else {
-                    // 如果不存在，创建新的高亮块
+                    // If not exists, create new highlight block
                     await logseq.Editor.insertBlock(
                       parentBlockId,
                       highlight.content,
-                      { properties: { id: highlight.properties?.id } }  // 更新 id 属性
+                      { properties: { id: highlight.properties?.id } }  // Update id property
                     )
                   }
                 }
               }
             } else {
-              // 如果高亮标题块不存在，创建新的高亮标题块及其子块
+              // If highlight title block doesn't exist, create new highlight title block and its children
               await logseq.Editor.insertBatchBlock(
                 existingItemBlock.uuid,
                 highlightsBlock,

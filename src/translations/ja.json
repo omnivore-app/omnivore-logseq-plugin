@@ -46,5 +46,7 @@
     "Failed to create Omnivore page. Please check the pageName in the settings": "Omnivoreページの作成に失敗しました。設定のページ名を確認してください",
     "### Content": "### 内容",
     "Sync article content": "記事の内容を同期する",
-    "Sync article content into the content block. If this is not selected, only highlights will be synced.": "記事の内容をコンテンツブロックに同期します。これが選択されていない場合、ハイライトのみが同期されます。"
+    "Sync article content into the content block. If this is not selected, only highlights will be synced.": "記事の内容をコンテンツブロックに同期します。これが選択されていない場合、ハイライトのみが同期されます。",
+    "Fixed Highlight ID": "固定ハイライトID",
+    "If checked, highlight blocks will have fixed IDs. This will cause the entire page to be recreated when updating articles.": "チェックすると、ハイライトブロックに固定IDが付与されます。これにより、記事を更新する際にページ全体が再作成されます。"
 }
